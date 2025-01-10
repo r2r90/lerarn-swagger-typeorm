@@ -8,12 +8,13 @@ import {
   IsString,
   IsUrl,
   Matches,
+  MaxLength,
   MinLength,
   ValidateNested,
 } from 'class-validator';
 import { PostTypeEnum } from '../enums/post-type.enum';
 import { PostStatusEnum } from '../enums/post-status.enum';
-import { CreatePostMetaOptionsDto } from './create-post-meta-options.dto';
+import { CreatePostMetaOptionsDto } from '../../meta-options/dto/create-post-meta-options.dto';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -23,6 +24,7 @@ export class CreatePostDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(4)
+  @MaxLength(96)
   @ApiProperty({
     description: 'This is the title of the Post',
   })
@@ -42,6 +44,7 @@ export class CreatePostDto {
   })
   @IsNotEmpty()
   @IsString()
+  @MaxLength(256)
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message:
       'A slug should be all small letters and uses only "-" and without spaces. For example: my-url',
@@ -80,6 +83,7 @@ export class CreatePostDto {
   })
   @IsUrl()
   @IsOptional()
+  @MaxLength(1024)
   featuredImageUrl?: string;
 
   @ApiPropertyOptional({
@@ -101,27 +105,21 @@ export class CreatePostDto {
   tags?: string[];
 
   @ApiPropertyOptional({
-    type: 'array',
+   // type: 'object',  when type is 'array' i have 0 problem
     required: false,
     items: {
       type: 'object',
       properties: {
-        key: {
-          type: 'string',
-          description: 'The key can be any string for your meta options.',
-          example: 'sidebarEnabled',
-        },
-        value: {
-          type: 'any',
-          description: 'Any value that you want to save to the key.',
-          example: true,
+        metaValue: {
+          type: 'json',
+          description: 'The metaValue is a JSON string.',
+          example: '{"sidebarEnabled":true}',
         },
       },
     },
   })
   @IsOptional()
-  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreatePostMetaOptionsDto)
-  metaOptions?: CreatePostMetaOptionsDto[];
+  metaOptions?: CreatePostMetaOptionsDto | null;
 }

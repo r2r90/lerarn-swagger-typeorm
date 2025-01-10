@@ -137,6 +137,7 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier">Public</span>
+                                    <span class="modifier">Async</span>
                                 <a href="#create" >create</a>
                             </li>
                             <li>
@@ -161,12 +162,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(userService: <a href="../injectables/UsersService.html" target="_self">UsersService</a>)</code>
+<code>constructor(userService: <a href="../injectables/UsersService.html" target="_self">UsersService</a>, postRepository: Repository<Post>, metaOptionsRepository: Repository<MetaOption>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="6" class="link-to-prism">src/posts/providers/posts.service.ts:6</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="10" class="link-to-prism">src/posts/providers/posts.service.ts:10</a></div>
                             </td>
                         </tr>
 
@@ -195,6 +196,30 @@
                                                     </td>
                                                     
                                                 </tr>
+                                                <tr>
+                                                        <td>postRepository</td>
+                                                  
+                                                        <td>
+                                                                    <code>Repository&lt;Post&gt;</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>metaOptionsRepository</td>
+                                                  
+                                                        <td>
+                                                                    <code>Repository&lt;MetaOption&gt;</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
                                         </tbody>
                                     </table>
                             </div>
@@ -216,6 +241,7 @@
                     <a name="create"></a>
                     <span class="name">
                             <span class="modifier">Public</span>
+                            <span class="modifier">Async</span>
                         <span ><b>create</b></span>
                         <a href="#create"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -231,8 +257,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="25"
-                                    class="link-to-prism">src/posts/providers/posts.service.ts:25</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="41"
+                                    class="link-to-prism">src/posts/providers/posts.service.ts:41</a></div>
                         </td>
                     </tr>
 
@@ -268,7 +294,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -300,8 +326,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="9"
-                                    class="link-to-prism">src/posts/providers/posts.service.ts:9</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="22"
+                                    class="link-to-prism">src/posts/providers/posts.service.ts:22</a></div>
                         </td>
                     </tr>
 
@@ -356,10 +382,23 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@nestjs/common&#x27;;
 import { UsersService } from &#x27;../../users/providers/users.service&#x27;;
 import { CreatePostDto } from &#x27;../dtos/create-post.dto&#x27;;
+import { InjectRepository } from &#x27;@nestjs/typeorm&#x27;;
+import { Post } from &#x27;../post.entity&#x27;;
+import { Repository } from &#x27;typeorm&#x27;;
+import { MetaOption } from &#x27;../../meta-options/meta-option.entity&#x27;;
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    @InjectRepository(Post)
+    private readonly postRepository: Repository&lt;Post&gt;,
+    /*
+     * Inject MetaOptions Repository
+     */
+    @InjectRepository(MetaOption)
+    private readonly metaOptionsRepository: Repository&lt;MetaOption&gt;,
+  ) {}
 
   public findAll(userId: string) {
     const user &#x3D; this.userService.findOneById(userId);
@@ -377,8 +416,29 @@ export class PostsService {
     ];
   }
 
-  public create(createPostDto: CreatePostDto) {
-    console.log(createPostDto);
+  /*
+   * Creating new Post
+   */
+  public async create(createPostDto: CreatePostDto) {
+    // Create MetaOptions
+    let metaOptions &#x3D; createPostDto.metaOptions
+      ? this.metaOptionsRepository.create(createPostDto.metaOptions)
+      : null;
+
+    if (metaOptions) {
+      await this.metaOptionsRepository.save(metaOptions);
+    }
+    // Create post
+
+    let post &#x3D; this.postRepository.create(createPostDto);
+    // Add metaOptions in the post
+
+    if (metaOptions) {
+      post.metaOptions &#x3D; metaOptions;
+    }
+    // return post to the user
+
+    return this.postRepository.save(post);
   }
 }
 </code></pre>

@@ -11,7 +11,7 @@ raw = '''
 {
   "title": "Test title",
   "postType": "post",
-  "slug": "new-slug-test",
+  "slug": "new-slug-test-1",
   "status": "draft",
   "content": "test content",
   "schema": "{\r\n \"@context\": \"https:\/\/schema.org\", \r\n \"@type\": \"Person\"\r\n}",
@@ -21,11 +21,8 @@ raw = '''
     "first",
     "second"
   ],
-  "metaOptions": [
-    {
-      "key": "sidebarEnabled",
-      "value": true
-    }
-  ]
+//  "metaOptions": {
+//    "metaValue": "{\"sidebarEnabled\":true, \"footerActive\":true}"
+//  }
 }'''
 ```

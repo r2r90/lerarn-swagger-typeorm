@@ -1,6 +1,6 @@
 export enum PostStatusEnum {
-  draft = 'draft',
-  scheduled = 'scheduled',
-  review = 'review',
-  published = 'published',
+  DRAFT = 'draft',
+  SCHEDULED = 'scheduled',
+  REVIEW = 'review',
+  PUBLISHED = 'published',
 }

@@ -258,7 +258,6 @@ import { AppService } from &#x27;./app.service&#x27;;
 import { UsersModule } from &#x27;./users/users.module&#x27;;
 import { PostsModule } from &#x27;./posts/posts.module&#x27;;
 import { TypeOrmModule } from &#x27;@nestjs/typeorm&#x27;;
-import { User } from &#x27;./users/user.entity&#x27;;
 import { TagsModule } from &#x27;./tags/tags.module&#x27;;
 import { MetaOptionsModule } from &#x27;./meta-options/meta-options.module&#x27;;
 
@@ -275,7 +274,8 @@ import { MetaOptionsModule } from &#x27;./meta-options/meta-options.module&#x27;
       inject: [],
       useFactory: () &#x3D;&gt; ({
         type: &#x27;postgres&#x27;,
-        entities: [User],
+        // entities: [User, Post, Tag],
+        autoLoadEntities: true,
         synchronize: true,
         port: 5432,
         username: &#x27;postgres&#x27;,
