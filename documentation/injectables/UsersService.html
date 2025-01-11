@@ -153,6 +153,7 @@
                             </li>
                             <li>
                                     <span class="modifier">Public</span>
+                                    <span class="modifier">Async</span>
                                 <a href="#findOneById" >findOneById</a>
                             </li>
                         </ul>
@@ -398,6 +399,7 @@ ensuring both services can reference each other without initialization issues.</
                     <a name="findOneById"></a>
                     <span class="name">
                             <span class="modifier">Public</span>
+                            <span class="modifier">Async</span>
                         <span ><b>findOneById</b></span>
                         <a href="#findOneById"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -406,7 +408,7 @@ ensuring both services can reference each other without initialization issues.</
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOneById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findOneById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
@@ -439,7 +441,7 @@ ensuring both services can reference each other without initialization issues.</
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -452,7 +454,7 @@ ensuring both services can reference each other without initialization issues.</
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>{ id: number; firstName: string; email: string; }</code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -529,12 +531,10 @@ export class UsersService {
   /**
    * The method to get user by id from the data.
    */
-  public findOneById(id: string) {
-    return {
-      id: 1234,
-      firstName: &#x27;John&#x27;,
-      email: &#x27;john@doe.com&#x27;,
-    };
+  public async findOneById(id: number) {
+    return await this.usersRepository.findOneBy({
+      id,
+    });
   }
 }
 </code></pre>

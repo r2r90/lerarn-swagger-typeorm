@@ -1,11 +1,14 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './providers/posts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -18,7 +21,7 @@ export class PostsController {
   constructor(private postsService: PostsService) {}
 
   @Get('/:userId?')
-  public getPosts(@Param('userId') userId: string) {
+  public getPosts(@Param('userId') userId: number) {
     return this.postsService.findAll(userId);
   }
 
@@ -40,6 +43,15 @@ export class PostsController {
   })
   @Patch('/')
   public updatePost(@Body() patchPostDto: PatchPostDto) {
-    console.log(patchPostDto);
+    return this.postsService.update(patchPostDto);
+  }
+
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'You get a 201 response if post is deleted successfully.',
+  })
+  @Delete()
+  public deletePost(@Query('id', ParseIntPipe) id: number) {
+    return this.postsService.delete(id);
   }
 }
