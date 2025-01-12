@@ -260,27 +260,35 @@ import { PostsModule } from &#x27;./posts/posts.module&#x27;;
 import { TypeOrmModule } from &#x27;@nestjs/typeorm&#x27;;
 import { TagsModule } from &#x27;./tags/tags.module&#x27;;
 import { MetaOptionsModule } from &#x27;./meta-options/meta-options.module&#x27;;
+import { ConfigModule, ConfigService } from &#x27;@nestjs/config&#x27;;
+import configurations from &#x27;./config&#x27;;
+import environementValidation from &#x27;./config/environement.validation&#x27;;
 
-/*
- * User created modules
- */
+const ENV &#x3D; process.env.NODE_ENV;
 
 @Module({
   imports: [
     UsersModule,
     PostsModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      //envFilePath: [&#x27;.env.development&#x27;],
+      envFilePath: !ENV ? &#x27;.env&#x27; : &#x60;.env.${ENV}&#x60;,
+      load: configurations,
+      validationSchema: environementValidation,
+    }),
     TypeOrmModule.forRootAsync({
-      imports: [],
-      inject: [],
-      useFactory: () &#x3D;&gt; ({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) &#x3D;&gt; ({
         type: &#x27;postgres&#x27;,
-        // entities: [User, Post, Tag],
-        autoLoadEntities: true,
-        synchronize: true,
-        port: 5432,
-        username: &#x27;postgres&#x27;,
-        password: &#x27;postgres&#x27;,
-        database: &#x27;udemy-nestjs&#x27;,
+        autoLoadEntities: configService.get(&#x27;dbConfig.autoloadEntities&#x27;),
+        synchronize: configService.get(&#x27;dbConfig.synchronize&#x27;),
+        port: +configService.get(&#x27;dbConfig.port&#x27;),
+        username: configService.get(&#x27;dbConfig.username&#x27;),
+        password: configService.get(&#x27;dbConfig.password&#x27;),
+        host: configService.get(&#x27;dbConfig.host&#x27;),
+        database: configService.get(&#x27;dbConfig.name&#x27;),
       }),
     }),
     TagsModule,

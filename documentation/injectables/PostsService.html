@@ -178,7 +178,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="12" class="link-to-prism">src/posts/providers/posts.service.ts:12</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/posts/providers/posts.service.ts:16</a></div>
                             </td>
                         </tr>
 
@@ -280,8 +280,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="43"
-                                    class="link-to-prism">src/posts/providers/posts.service.ts:43</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="47"
+                                    class="link-to-prism">src/posts/providers/posts.service.ts:47</a></div>
                         </td>
                     </tr>
 
@@ -350,8 +350,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="87"
-                                    class="link-to-prism">src/posts/providers/posts.service.ts:87</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="132"
+                                    class="link-to-prism">src/posts/providers/posts.service.ts:132</a></div>
                         </td>
                     </tr>
 
@@ -420,8 +420,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="34"
-                                    class="link-to-prism">src/posts/providers/posts.service.ts:34</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="38"
+                                    class="link-to-prism">src/posts/providers/posts.service.ts:38</a></div>
                         </td>
                     </tr>
 
@@ -490,8 +490,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="61"
-                                    class="link-to-prism">src/posts/providers/posts.service.ts:61</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="65"
+                                    class="link-to-prism">src/posts/providers/posts.service.ts:65</a></div>
                         </td>
                     </tr>
 
@@ -543,7 +543,11 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@nestjs/common&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+  BadRequestException,
+  Injectable,
+  RequestTimeoutException,
+} from &#x27;@nestjs/common&#x27;;
 import { UsersService } from &#x27;../../users/providers/users.service&#x27;;
 import { CreatePostDto } from &#x27;../dtos/create-post.dto&#x27;;
 import { InjectRepository } from &#x27;@nestjs/typeorm&#x27;;
@@ -605,10 +609,42 @@ export class PostsService {
 
   public async update(patchPostDto: PatchPostDto) {
     // Find the Tags
-    let tags &#x3D; await this.tagsService.findTags(patchPostDto.tags);
+    let tags &#x3D; await this.tagsService
+      .findTags(patchPostDto.tags)
+      .catch((error) &#x3D;&gt; {
+        throw new RequestTimeoutException(
+          &#x27;Unable to process your request at the moment please try later&#x27;,
+          {
+            description: &#x27;Error connecting to database&#x27;,
+          },
+        );
+      });
+
+    /*
+     * Number of tags need to be equal
+     */
+
+    if (!tags || tags.length !&#x3D;&#x3D; patchPostDto.tags.length) {
+      throw new BadRequestException(
+        &#x27;Please check your tag Ids and esure they are correct&#x27;,
+      );
+    }
 
     // Find th Post
-    let post &#x3D; await this.postRepository.findOneBy({ id: patchPostDto.id });
+    let post &#x3D; await this.postRepository
+      .findOneBy({ id: patchPostDto.id })
+      .catch((error) &#x3D;&gt; {
+        throw new RequestTimeoutException(
+          &#x27;Unable to process your request at the moment please try later&#x27;,
+          {
+            description: &#x27;Error connecting to database&#x27;,
+          },
+        );
+      });
+
+    if (!post) {
+      throw new BadRequestException(&#x27;The post ID does not exist&#x27;);
+    }
 
     post.title &#x3D; patchPostDto.title ?? post.title;
     post.content &#x3D; patchPostDto.content ?? post.content;
@@ -621,9 +657,18 @@ export class PostsService {
 
     // Assign the new tags
     post.tags &#x3D; tags;
-    // Save the post and return
 
-    return await this.postRepository.save(post);
+    // Save the post and return
+    const savedPost &#x3D; await this.postRepository.save(post).catch((error) &#x3D;&gt; {
+      throw new RequestTimeoutException(
+        &#x27;Unable to process your request at the moment please try later&#x27;,
+        {
+          description: &#x27;Error connecting to database&#x27;,
+        },
+      );
+    });
+
+    return savedPost;
   }
 
   /*
