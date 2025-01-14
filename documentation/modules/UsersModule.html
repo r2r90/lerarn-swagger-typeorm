@@ -243,11 +243,12 @@ import { UsersService } from &#x27;./providers/users.service&#x27;;
 import { TypeOrmModule } from &#x27;@nestjs/typeorm&#x27;;
 import { User } from &#x27;./user.entity&#x27;;
 import { ConfigModule } from &#x27;@nestjs/config&#x27;;
+import { UsersCreateManyProvider } from &#x27;./providers/users-create-many.provider&#x27;;
 import profileConfig from &#x27;./config/profile.config&#x27;;
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UsersCreateManyProvider],
   exports: [UsersService],
   imports: [
     TypeOrmModule.forFeature([User]),
