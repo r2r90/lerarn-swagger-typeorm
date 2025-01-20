@@ -7,8 +7,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TagsModule } from './tags/tags.module';
 import { MetaOptionsModule } from './meta-options/meta-options.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PaginationModule } from './common/pagination.module';
+import { AuthModule } from './auth/auth.module';
+import { AuthController } from './auth.controller';
 import configurations from './config';
 import environementValidation from './config/environement.validation';
+import jwtConfig from './auth/config/jwt.config';
+import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
+import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
 
 const ENV = process.env.NODE_ENV;
 
@@ -37,10 +45,21 @@ const ENV = process.env.NODE_ENV;
         database: configService.get('dbConfig.name'),
       }),
     }),
+    ConfigModule.forFeature(jwtConfig),
+    JwtModule.registerAsync(jwtConfig.asProvider()),
     TagsModule,
     MetaOptionsModule,
+    PaginationModule,
+    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, AuthController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthenticationGuard,
+    },
+    AccessTokenGuard,
+  ],
 })
 export class AppModule {}

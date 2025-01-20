@@ -11,6 +11,11 @@ import { Repository } from 'typeorm';
 import { MetaOption } from '../../meta-options/meta-option.entity';
 import { TagsService } from '../../tags/providers/tags.service';
 import { PatchPostDto } from '../dtos/patch-post.dto';
+import { GetPostsDto } from '../dtos/get-posts.dto';
+import { PaginationProvider } from '../../common/pagination/providers/pagination.provider';
+import { Paginated } from '../../common/pagination/interfaces/paginated.interface';
+import { CreatePostProvider } from './create-post.provider';
+import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 
 @Injectable()
 export class PostsService {
@@ -33,10 +38,27 @@ export class PostsService {
      */
     @InjectRepository(MetaOption)
     private readonly metaOptionsRepository: Repository<MetaOption>,
+    /*
+     * Inject Pagination Provider
+     */
+    private readonly paginationProvider: PaginationProvider,
+    /*
+     * Inject Create Post Provider
+     */
+    private readonly createPostProvider: CreatePostProvider,
   ) {}
 
-  public async findAll(userId: number) {
-    let posts = await this.postRepository.find({});
+  public async findAll(
+    postQuery: GetPostsDto,
+    userId: number,
+  ): Promise<Paginated<Post>> {
+    let posts = await this.paginationProvider.paginateQuery(
+      {
+        limit: postQuery.limit,
+        page: postQuery.page,
+      },
+      this.postRepository,
+    );
 
     return posts;
   }
@@ -44,22 +66,8 @@ export class PostsService {
   /*
    * Creating new Post
    */
-  public async create(createPostDto: CreatePostDto) {
-    //Find author from DB based on authorId
-    let author = await this.userService.findOneById(createPostDto.authorId);
-
-    // Find tags
-    let tags = await this.tagsService.findTags(createPostDto.tags);
-
-    // Create post
-
-    let post = this.postRepository.create({
-      ...createPostDto,
-      author,
-      tags,
-    });
-
-    return this.postRepository.save(post);
+  public async create(createPostDto: CreatePostDto, user: ActiveUserData) {
+    return await this.createPostProvider.create(createPostDto, user);
   }
 
   public async update(patchPostDto: PatchPostDto) {

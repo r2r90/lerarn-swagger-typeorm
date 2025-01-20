@@ -1,12 +1,4 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  RequestTimeoutException
-} from "@nestjs/common";
-import { GetUsersParamDto } from "../dto/get-users-param.dto";
+import { BadRequestException, Inject, Injectable, RequestTimeoutException } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { User } from "../user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -15,6 +7,11 @@ import { ConfigType } from "@nestjs/config";
 import profileConfig from "../config/profile.config";
 import { UsersCreateManyProvider } from "./users-create-many.provider";
 import { CreateManyUsersDto } from "../dto/create-many-users.dto";
+import { GetUsersParamDto } from "../dto/get-users-param.dto";
+import { GetUsersQueryDto } from "../dto/get-users-query.dto";
+import { PaginationProvider } from "../../common/pagination/providers/pagination.provider";
+import { CreateUserProvider } from "./create-user.provider";
+import { FindOneUserByEmailProvider } from "./find-one-user-by-email.provider";
 
 /**
  * Service to connect to Users table and perform business operations
@@ -41,66 +38,45 @@ export class UsersService {
      * Inject usersCreateMayProvider
      */
     private readonly usersCreateManyProvider: UsersCreateManyProvider,
+    /*
+     * Inject Pagination Provider
+     */
+    private readonly paginationProvider: PaginationProvider,
+    /*
+     * Inject Create User Provider
+     */
+    private readonly createUserProvider: CreateUserProvider,
+    /*
+     * Inject Find One User by Email Provider
+     */
+
+    private readonly findOneByEmailProvider: FindOneUserByEmailProvider,
   ) {}
 
   public async createUser(createUserDto: CreateUserDto) {
-    // Check is user exists with same email
-    const existingUser = await this.usersRepository
-      .findOne({
-        where: { email: createUserDto.email },
-      })
-      .catch((err) => {
-        throw new RequestTimeoutException(
-          'Unable to process your request at the moment please try later',
-          {
-            description: 'Error connecting to database',
-          },
-        );
-      });
-    // Handle exception
-
-    if (existingUser) {
-      throw new BadRequestException(
-        'User already exists, please check your email address',
-      );
-    }
-
-    let newUser = this.usersRepository.create(createUserDto);
-
-    newUser = await this.usersRepository.save(newUser).catch((err) => {
-      throw new RequestTimeoutException(
-        'Unable to process your request at the moment please try later',
-        {
-          description: 'Error connecting to database',
-        },
-      );
-    });
-    return newUser;
-
-    // Create a new user
+    return this.createUserProvider.createUser(createUserDto);
   }
 
   /**
    * The method to get all users from the data.
    */
-  public findAll(
+  public async findAll(
     getUsersParamDto: GetUsersParamDto,
-    limit: number,
-    page: number,
+    getUsersQuery: GetUsersQueryDto,
   ) {
-    throw new HttpException(
-      {
-        status: HttpStatus.MOVED_PERMANENTLY,
-        error: 'The API endpoint does not exist',
-        fileName: 'users.service.ts',
-        lineNumber: 88,
-      },
-      HttpStatus.MOVED_PERMANENTLY,
-      {
-        cause: new Error(),
-        description: 'Occurred because the API endpoint does not exist',
-      },
-    );
+    let users = await this.paginationProvider
+      .paginateQuery(
+        {
+          limit: getUsersQuery.limit,
+          page: getUsersQuery.page,
+        },
+        this.usersRepository,
+      )
+      .catch((err) => {
+        throw new RequestTimeoutException(err.detail);
+      });
+
+    return users;
   }
 
   /**
@@ -132,5 +108,9 @@ export class UsersService {
 
   public async createMany(createManyUsersDto: CreateManyUsersDto) {
     return await this.usersCreateManyProvider.createMany(createManyUsersDto);
+  }
+
+  public async findOneByEmail(email: string): Promise<User> {
+    return await this.findOneByEmailProvider.findOneByEmail(email);
   }
 }

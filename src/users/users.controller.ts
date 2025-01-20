@@ -1,11 +1,9 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -16,6 +14,7 @@ import { PatchUserDto } from './dto/patch-user.dto';
 import { UsersService } from './providers/users.service';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateManyUsersDto } from './dto/create-many-users.dto';
+import { GetUsersQueryDto } from './dto/get-users-query.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -46,15 +45,14 @@ export class UsersController {
   })
   public getUsers(
     @Param() getUserParamDto: GetUsersParamDto,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe)
-    limit: number | undefined,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe)
-    page: number | undefined,
+    @Query() getUsersQuery: GetUsersQueryDto,
   ) {
-    return this.usersService.findAll(getUserParamDto, limit, page);
+    return this.usersService.findAll(getUserParamDto, getUsersQuery);
   }
 
   @Post()
+  //@SetMetadata('authType', 'None')
+  // @Auth(AuthType.Bearer)
   public createUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
   }

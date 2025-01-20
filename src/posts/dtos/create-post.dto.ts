@@ -1,8 +1,8 @@
 import {
   IsArray,
+  IsDate,
   IsEnum,
   IsInt,
-  IsISO8601,
   IsJSON,
   IsNotEmpty,
   IsOptional,
@@ -86,11 +86,11 @@ export class CreatePostDto {
   featuredImageUrl?: string;
 
   @ApiPropertyOptional({
-    description: 'The date on which blog post is published',
+    description: 'The date on which the blog post is published',
     example: '2024-03-16T07:46:32+0000',
   })
+  @IsDate()
   @IsOptional()
-  @IsISO8601()
   publishOn?: Date;
 
   @ApiPropertyOptional({
@@ -120,13 +120,4 @@ export class CreatePostDto {
   @ValidateNested({ each: true })
   @Type(() => CreatePostMetaOptionsDto)
   metaOptions?: CreatePostMetaOptionsDto | null;
-
-  @ApiProperty({
-    type: 'integer',
-    required: true,
-    example: 1,
-  })
-  @IsNotEmpty()
-  @IsInt()
-  authorId: number;
 }
