@@ -10,6 +10,7 @@ import { PaginationModule } from '../common/pagination.module';
 import { AuthModule } from '../auth/auth.module';
 import { CreateUserProvider } from './providers/create-user.provider';
 import { FindOneUserByEmailProvider } from './providers/find-one-user-by-email.provider';
+import { FindOneByGoogleIdProvider } from "./providers/find-one-by-google-id.provider";
 
 @Module({
   controllers: [UsersController],
@@ -18,6 +19,7 @@ import { FindOneUserByEmailProvider } from './providers/find-one-user-by-email.p
     UsersCreateManyProvider,
     CreateUserProvider,
     FindOneUserByEmailProvider,
+    FindOneByGoogleIdProvider,
   ],
   exports: [UsersService],
   imports: [

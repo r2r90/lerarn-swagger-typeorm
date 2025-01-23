@@ -1,20 +1,22 @@
 import {
   ConflictException,
-  Injectable,
-  RequestTimeoutException,
-} from '@nestjs/common';
+  Injectable, OnApplicationBootstrap,
+  RequestTimeoutException
+} from "@nestjs/common";
 import { DataSource } from 'typeorm';
 import { User } from '../user.entity';
 import { CreateManyUsersDto } from '../dto/create-many-users.dto';
 
 @Injectable()
-export class UsersCreateManyProvider {
+export class UsersCreateManyProvider  {
   constructor(
     /*
      * Inject Datasource
      */
     private readonly dataSource: DataSource,
   ) {}
+
+
 
   public async createMany(createManyUsersDto: CreateManyUsersDto) {
     const newUsers: User[] = [];

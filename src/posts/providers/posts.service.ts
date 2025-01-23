@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  OnApplicationBootstrap,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { UsersService } from '../../users/providers/users.service';
@@ -11,14 +12,14 @@ import { Repository } from 'typeorm';
 import { MetaOption } from '../../meta-options/meta-option.entity';
 import { TagsService } from '../../tags/providers/tags.service';
 import { PatchPostDto } from '../dtos/patch-post.dto';
-import { GetPostsDto } from '../dtos/get-posts.dto';
-import { PaginationProvider } from '../../common/pagination/providers/pagination.provider';
-import { Paginated } from '../../common/pagination/interfaces/paginated.interface';
 import { CreatePostProvider } from './create-post.provider';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
+import { PaginationProvider } from '../../common/pagination/providers/pagination.provider';
+import { Paginated } from '../../common/pagination/interfaces/paginated.interface';
+import { GetPostsDto } from '../dtos/get-posts.dto';
 
 @Injectable()
-export class PostsService {
+export class PostsService implements OnApplicationBootstrap {
   constructor(
     /*
      * Injecting Users Service
@@ -47,6 +48,14 @@ export class PostsService {
      */
     private readonly createPostProvider: CreatePostProvider,
   ) {}
+
+  onApplicationBootstrap(): any {
+    try {
+      console.log('HELLO FROM POSTS');
+    } catch (error) {
+      console.error('Error in onApplicationBootstrap:', error);
+    }
+  }
 
   public async findAll(
     postQuery: GetPostsDto,

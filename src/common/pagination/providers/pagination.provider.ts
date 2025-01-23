@@ -1,19 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PaginationQueryDto } from '../dtos/pagination-query.dto';
 import { ObjectLiteral, Repository } from 'typeorm';
-import { Request } from 'express';
-import { REQUEST } from '@nestjs/core';
 import { Paginated } from '../interfaces/paginated.interface';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 
 @Injectable()
 export class PaginationProvider {
-  constructor(
-    /*
-     * Injecting Request
-     */
-    @Inject(REQUEST)
-    private readonly request: Request,
-  ) {}
+  constructor(@Inject(REQUEST) private readonly request: Request) {}
 
   public async paginateQuery<T extends ObjectLiteral>(
     paginationQuery: PaginationQueryDto,

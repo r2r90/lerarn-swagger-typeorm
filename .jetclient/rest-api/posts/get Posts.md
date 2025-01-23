@@ -20,6 +20,9 @@ value = '1'
 [[queryParams]]
 key = 'page'
 value = '2'
+
+[auth.bearer]
+token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQxLCJlbWFpbCI6ImpvaG5AaGFzaGVkLmNvbSIsImlhdCI6MTczNzYzOTQzOSwiZXhwIjoxNzM3NjQzMDM5LCJhdWQiOiJsb2NhbGhvc3Q6MzAwMCIsImlzcyI6ImxvY2FsaG9zdDozMDAwIn0.3BLSACx_HqoarS_5_ZnAF34z9FzWmSe2mxu5-zfzYos'
 ```
 
 #### Pre-request Script
